@@ -1,0 +1,5 @@
+/home/koldar/EclipseWorkspace/DIP_01/build/Debug/CMakeFiles/edit_cache.dir
+/home/koldar/EclipseWorkspace/DIP_01/build/Debug/CMakeFiles/rebuild_cache.dir
+/home/koldar/EclipseWorkspace/DIP_01/build/Debug/src/main/cpp/CMakeFiles/edit_cache.dir
+/home/koldar/EclipseWorkspace/DIP_01/build/Debug/src/main/cpp/CMakeFiles/rebuild_cache.dir
+/home/koldar/EclipseWorkspace/DIP_01/build/Debug/src/main/cpp/CMakeFiles/DisplayImage.dir
