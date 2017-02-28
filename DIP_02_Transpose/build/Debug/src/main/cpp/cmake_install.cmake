@@ -1,4 +1,4 @@
-# Install script for directory: /home/koldar/EclipseWorkspace/DIP_02_Transpose/src/main/cpp
+# Install script for directory: /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/src/main/cpp
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

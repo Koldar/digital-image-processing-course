@@ -6,5 +6,5 @@ CXX_FLAGS = -g   -Werror=implicit-function-declaration -Wfatal-errors
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/koldar/EclipseWorkspace/DIP_02_Transpose/src/main/cpp/../include -isystem /usr/local/include -isystem /usr/local/include/opencv 
+CXX_INCLUDES = -I/home/koldar/git/digital-image-processing-course/DIP_02_Transpose/src/main/cpp/../include -isystem /usr/local/include -isystem /usr/local/include/opencv 
 

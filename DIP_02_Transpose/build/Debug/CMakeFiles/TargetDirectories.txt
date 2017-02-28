@@ -1,5 +1,5 @@
-/home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug/CMakeFiles/edit_cache.dir
-/home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug/CMakeFiles/rebuild_cache.dir
-/home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug/src/main/cpp/CMakeFiles/edit_cache.dir
-/home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug/src/main/cpp/CMakeFiles/rebuild_cache.dir
-/home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug/src/main/cpp/CMakeFiles/DisplayImage.dir
+/home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug/CMakeFiles/edit_cache.dir
+/home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug/CMakeFiles/rebuild_cache.dir
+/home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug/src/main/cpp/CMakeFiles/edit_cache.dir
+/home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug/src/main/cpp/CMakeFiles/rebuild_cache.dir
+/home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug/src/main/cpp/CMakeFiles/DisplayImage.dir

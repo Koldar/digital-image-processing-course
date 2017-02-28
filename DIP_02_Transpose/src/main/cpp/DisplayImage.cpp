@@ -16,7 +16,9 @@ typedef enum {
 
 static void addSaltAndPepperNoise(Mat& image);
 static void addWhiteNoise(Mat& image);
-static void addGaussianNoise(Mat& image);
+static void addUniformAndGaussianNoise(Mat& image);
+
+static void generateContrastSesntivityFunction(Mat& startImage);
 
 static void rotate90(Mat& image, RotationEnum re);
 static void flipImage(Mat& image, FlipEnum fe);
@@ -24,15 +26,31 @@ static void crop(Mat& image, Mat* output, const Rect2i& cropRectangle);
 static void negative(Mat& image, Mat* output);
 static void setImagePixelsTo(Mat& image, Vec3b color);
 
-static void addWhiteNoise(Mat& image) {
-	/**
-	 * The white noise
-	 */
-	randn(image, 0, 100000);
+static void generateContrastSesntivityFunction(Mat& startImage) {
+
 }
 
-static void addGaussianNoise(Mat& image) {
+static void addWhiteNoise(Mat& image) {
+	/*
+	 * The white noise is a signal whose frequency spectrum has all the frequencies equally contributing to the spectrum itself
+	 * (constant value in X(f)).
+	 *
+	 * The image has several spatial frequencies inside  it (depending on the sharpness of the borders).
+	 * So if we add a random value (with mean set to 0) per each pixels, we are de facto applying some noise to every
+	 * image frequency.
+	 */
+	randn(image, 0, 10);
+}
 
+static void addUniformAndGaussianNoise(Mat& image) {
+	Mat uniformatAndGaussian = Mat::zeros(image.rows, image.cols, CV_8U);
+	/*
+	 * The gaussian noise is a white noise in frequnecy X(f) = k but is gaussian in probability:
+	 * so we need to attack every frequency in the image but the amount of noise depends on mean/variance of the gaussian itself.
+	 *
+	 * How can we create a gaussian noise. By definition with randu
+	 */
+	randu(uniformatAndGaussian, 0, 10);
 }
 
 static void addSaltAndPepperNoise(Mat& image) {
@@ -246,7 +264,8 @@ int main(int argc, char** argv )
 	//negative(image, &output);
 	//setImagePixelsTo(image, Vec3b{120,0,0});
 
-	addWhiteNoise(image);
+	//addWhiteNoise(image);
+	addUniformAndGaussianNoise(image);
 	//addSaltAndPepperNoise(image);
 
 	namedWindow("Display Image", WINDOW_AUTOSIZE );

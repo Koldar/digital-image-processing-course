@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/koldar/EclipseWorkspace/DIP_02_Transpose
+CMAKE_SOURCE_DIR = /home/koldar/git/digital-image-processing-course/DIP_02_Transpose
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug
+CMAKE_BINARY_DIR = /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,14 +80,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(CMAKE_COMMAND) -E cmake_progress_start /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug/CMakeFiles /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug/src/main/cpp/CMakeFiles/progress.marks
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(MAKE) -f CMakeFiles/Makefile2 src/main/cpp/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug/CMakeFiles 0
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(CMAKE_COMMAND) -E cmake_progress_start /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug/CMakeFiles /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug/src/main/cpp/CMakeFiles/progress.marks
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(MAKE) -f CMakeFiles/Makefile2 src/main/cpp/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(MAKE) -f CMakeFiles/Makefile2 src/main/cpp/clean
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(MAKE) -f CMakeFiles/Makefile2 src/main/cpp/clean
 .PHONY : clean
 
 # The main clean target
@@ -97,22 +97,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(MAKE) -f CMakeFiles/Makefile2 src/main/cpp/preinstall
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(MAKE) -f CMakeFiles/Makefile2 src/main/cpp/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(MAKE) -f CMakeFiles/Makefile2 src/main/cpp/preinstall
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(MAKE) -f CMakeFiles/Makefile2 src/main/cpp/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 src/main/cpp/CMakeFiles/DisplayImage.dir/rule:
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(MAKE) -f CMakeFiles/Makefile2 src/main/cpp/CMakeFiles/DisplayImage.dir/rule
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(MAKE) -f CMakeFiles/Makefile2 src/main/cpp/CMakeFiles/DisplayImage.dir/rule
 .PHONY : src/main/cpp/CMakeFiles/DisplayImage.dir/rule
 
 # Convenience name for target.
@@ -122,7 +122,7 @@ DisplayImage: src/main/cpp/CMakeFiles/DisplayImage.dir/rule
 
 # fast build rule for target.
 DisplayImage/fast:
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(MAKE) -f src/main/cpp/CMakeFiles/DisplayImage.dir/build.make src/main/cpp/CMakeFiles/DisplayImage.dir/build
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(MAKE) -f src/main/cpp/CMakeFiles/DisplayImage.dir/build.make src/main/cpp/CMakeFiles/DisplayImage.dir/build
 .PHONY : DisplayImage/fast
 
 DisplayImage.o: DisplayImage.cpp.o
@@ -131,7 +131,7 @@ DisplayImage.o: DisplayImage.cpp.o
 
 # target to build an object file
 DisplayImage.cpp.o:
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(MAKE) -f src/main/cpp/CMakeFiles/DisplayImage.dir/build.make src/main/cpp/CMakeFiles/DisplayImage.dir/DisplayImage.cpp.o
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(MAKE) -f src/main/cpp/CMakeFiles/DisplayImage.dir/build.make src/main/cpp/CMakeFiles/DisplayImage.dir/DisplayImage.cpp.o
 .PHONY : DisplayImage.cpp.o
 
 DisplayImage.i: DisplayImage.cpp.i
@@ -140,7 +140,7 @@ DisplayImage.i: DisplayImage.cpp.i
 
 # target to preprocess a source file
 DisplayImage.cpp.i:
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(MAKE) -f src/main/cpp/CMakeFiles/DisplayImage.dir/build.make src/main/cpp/CMakeFiles/DisplayImage.dir/DisplayImage.cpp.i
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(MAKE) -f src/main/cpp/CMakeFiles/DisplayImage.dir/build.make src/main/cpp/CMakeFiles/DisplayImage.dir/DisplayImage.cpp.i
 .PHONY : DisplayImage.cpp.i
 
 DisplayImage.s: DisplayImage.cpp.s
@@ -149,7 +149,7 @@ DisplayImage.s: DisplayImage.cpp.s
 
 # target to generate assembly for a file
 DisplayImage.cpp.s:
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(MAKE) -f src/main/cpp/CMakeFiles/DisplayImage.dir/build.make src/main/cpp/CMakeFiles/DisplayImage.dir/DisplayImage.cpp.s
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(MAKE) -f src/main/cpp/CMakeFiles/DisplayImage.dir/build.make src/main/cpp/CMakeFiles/DisplayImage.dir/DisplayImage.cpp.s
 .PHONY : DisplayImage.cpp.s
 
 # Help Target
@@ -175,6 +175,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/koldar/EclipseWorkspace/DIP_02_Transpose/build/Debug && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/koldar/git/digital-image-processing-course/DIP_02_Transpose/build/Debug && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

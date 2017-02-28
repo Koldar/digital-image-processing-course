@@ -6,10 +6,12 @@
 
 #IncludeRegexTransform: 
 
-/home/koldar/EclipseWorkspace/DIP_02_Transpose/src/main/cpp/DisplayImage.cpp
+/home/koldar/git/digital-image-processing-course/DIP_02_Transpose/src/main/cpp/DisplayImage.cpp
 stdio.h
 -
 opencv2/opencv.hpp
+-
+limits.h
 -
 
 /usr/local/include/opencv/cxcore.h
