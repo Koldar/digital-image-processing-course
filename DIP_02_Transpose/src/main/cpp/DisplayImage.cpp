@@ -18,7 +18,7 @@ static void addSaltAndPepperNoise(Mat& image);
 static void addWhiteNoise(Mat& image);
 static void addUniformAndGaussianNoise(Mat& image);
 
-static void generateContrastSesntivityFunction(Mat& startImage);
+static void generateContrastSensitivityFunction(Mat& image);
 
 static void rotate90(Mat& image, RotationEnum re);
 static void flipImage(Mat& image, FlipEnum fe);
@@ -26,11 +26,32 @@ static void crop(Mat& image, Mat* output, const Rect2i& cropRectangle);
 static void negative(Mat& image, Mat* output);
 static void setImagePixelsTo(Mat& image, Vec3b color);
 
-static void generateContrastSesntivityFunction(Mat& startImage) {
+/**
+ * Generate the constrast sensitivity function
+ *
+ * <img src="http://ohzawa-lab.bpe.es.osaka-u.ac.jp/ohzawa-lab/izumi/CSF/CSFchart640x480.gif"/>
+ *
+ * The function is generated with this function:
+ *
+ * \f[ I(i, j) = 128 · [1 + sin(exp(x)) · (y^3)] \f]
+ * \f[ i \in [0; I_{height}] \f]
+ * \f[ j \in [0; I_{width}] \f]
+ * \f[ x \in [0; 4] \f]
+ * \f[ y \in [0; 1] \f]
+ *
+ *@param[out] the image to use. Set it only width and height images
+ */
+static void generateContrastSensitivityFunction(Mat& image) {
 
+	for (int y=0; y<image.rows; y++) {
+		for (int x=0; x<image.cols; x++) {
+			image.at<unsigned char>(y, x) = 128 * (1 + sin(exp(5*((x + 0.)/image.cols))) * (pow((y + 0.)/image.rows, 3)));
+		}
+	}
 }
 
 static void addWhiteNoise(Mat& image) {
+	Mat whiteNoise = Mat::zeros(image.rows, image.cols, CV_8UC3);
 	/*
 	 * The white noise is a signal whose frequency spectrum has all the frequencies equally contributing to the spectrum itself
 	 * (constant value in X(f)).
@@ -39,18 +60,22 @@ static void addWhiteNoise(Mat& image) {
 	 * So if we add a random value (with mean set to 0) per each pixels, we are de facto applying some noise to every
 	 * image frequency.
 	 */
-	randn(image, 0, 10);
+	randn(whiteNoise, 0, 10);
+
+	image = image + whiteNoise;
 }
 
 static void addUniformAndGaussianNoise(Mat& image) {
-	Mat uniformatAndGaussian = Mat::zeros(image.rows, image.cols, CV_8U);
+	Mat uniformAndGaussian = Mat::zeros(image.rows, image.cols, CV_8UC3);
 	/*
 	 * The gaussian noise is a white noise in frequnecy X(f) = k but is gaussian in probability:
 	 * so we need to attack every frequency in the image but the amount of noise depends on mean/variance of the gaussian itself.
 	 *
 	 * How can we create a gaussian noise. By definition with randu
 	 */
-	randu(uniformatAndGaussian, 0, 10);
+	randu(uniformAndGaussian, 0, 100);
+
+	image += uniformAndGaussian;
 }
 
 static void addSaltAndPepperNoise(Mat& image) {
@@ -91,7 +116,7 @@ static void addSaltAndPepperNoise(Mat& image) {
 static void setImagePixelsTo(Mat& image, Vec3b color) {
 	for (int y=0; y<image.rows; y++) {
 		for (int x=0; x<image.cols; x++) {
-				image.at<Vec3b>(y, x) = color;
+			image.at<Vec3b>(y, x) = color;
 		}
 	}
 }
@@ -267,6 +292,9 @@ int main(int argc, char** argv )
 	//addWhiteNoise(image);
 	addUniformAndGaussianNoise(image);
 	//addSaltAndPepperNoise(image);
+
+	//Mat csf = Mat{700, 700, CV_8U};
+	//generateContrastSensitivityFunction(csf);
 
 	namedWindow("Display Image", WINDOW_AUTOSIZE );
 	imshow("Display Image", image);
