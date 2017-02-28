@@ -36,7 +36,7 @@ static void setImagePixelsTo(Mat& image, Vec3b color);
  * \f[ I(i, j) = 128 · [1 + sin(exp(x)) · (y^3)] \f]
  * \f[ i \in [0; I_{height}] \f]
  * \f[ j \in [0; I_{width}] \f]
- * \f[ x \in [0; 4] \f]
+ * \f[ x \in [0; 5] \f]
  * \f[ y \in [0; 1] \f]
  *
  *@param[out] the image to use. Set it only width and height images
