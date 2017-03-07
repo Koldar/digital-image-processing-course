@@ -164,7 +164,8 @@ int main(int argc, char** argv )
 	}
 
 	Mat image;
-	image = imread( argv[1], IMREAD_GRAYSCALE);
+	//image = imread( argv[1], IMREAD_GRAYSCALE);
+	image = imread( argv[1], IMREAD_COLOR);
 
 	if (!image.data)
 	{
