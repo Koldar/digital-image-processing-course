@@ -33,10 +33,12 @@ using namespace cv;
 		h[i] = h[i]/pixelsNumber;
 	}
 
+	//teh result should be 1
 	double sum = 0;
 	for (int i=0; i<h.size(); i++) {
 		sum += h[i];
 	}
+	::std::cout << "The sum of all the values of the pdf should be 1. It is = " << sum << ::std::endl;
 
 	return h;
 }
@@ -51,19 +53,53 @@ using namespace cv;
  * \f]
  * In order to generate the pdf function use ::getDensityProbabilityDistribution function
  *
- * @param[in] pdf the pdf function to use
+ * @param[in] input the image to compute the cumulative density probability distribution
  * @return the cumulative density probability distribution
  */
-::std::vector<double> getCumulativeDensityProbabilityDistribution(const ::std::vector<double>& pdf) {
-	::std::vector<double> f = ::std::vector<double>{256, 0};
-	double previousSum = 0;
+::std::vector<double> getCumulativeDensityProbabilityDistribution(const Mat& input) {
+	::std::vector<double> H = ::std::vector<double>{256, 0};
+	ulong pixelsNumber;
 
-	for (int i=0; i<pdf.size(); i++) {
-		f[i] = f[i] + previousSum;
-		previousSum = f[i];
+	pixelsNumber = (ulong)input.rows * (ulong)input.cols;
+
+	for (int y=0; y<input.rows; y++) {
+		for (int x=0; x<input.cols; x++) {
+			H[input.at<uchar>(y, x)] += 1;
+		}
 	}
 
-	return f;
+	for (int i=0; i<H.size(); i++) {
+		H[i] = H[i]/pixelsNumber;
+	}
+
+	double previousSum = 0;
+	for (int i=0; i<H.size(); i++) {
+		H[i] = previousSum + H[i];
+		previousSum = H[i];
+	}
+
+	::std::cout << "the last element of the cumulative function has to be 1. It is " << H[H.size()-1] << ::std::endl;
+
+	return H;
+}
+
+/**
+ * Testing function used to generate plot file of a function
+ *
+ * \post
+ * 	\li this will create in the CWD the file called \c fileToCreate
+ *
+ * @param[in] function the function to plot
+ * @param[in] fileToCreate name of the file to create
+ */
+void createHistogramOf(const ::std::vector<double> function, const char* fileToCreate) {
+	FILE* f = fopen(fileToCreate, "w");
+	if (f != NULL) {
+		for (int i=0; i<function.size(); i++) {
+			fprintf(f, "%d %f\n", i, function[i]);
+		}
+		fclose(f);
+	}
 }
 
 /**
@@ -75,18 +111,49 @@ using namespace cv;
  */
 void createHistogramOf(const Mat& input, const char* fileToCreate) {
 	::std::vector<double> h = getDensityProbabilityDistribution(input);
-	::std::vector<double> H = getCumulativeDensityProbabilityDistribution(h);
+	createHistogramOf(h, fileToCreate);
+}
 
-	FILE* f = fopen(fileToCreate, "w");
-	if (f != NULL) {
-		for (int i=0; i<h.size(); i++) {
-			fprintf(f, "%d %f\n", i, h[i]);
+/**
+ * Generate an equalized image given \c input
+ *
+ * Equalization is defined as:
+ * \$[
+ * 	I_{eq}(i,j) = T(I(i,j)) = H(I(i,j))
+ * \f]
+ *
+ * Where \c H is the cumulative density probability distribution.
+ *
+ * @param[in] input the image to compute the equalization on
+ * @return the equalized image. Be sure to \b free the return value after using it!
+ */
+Mat* generateEqualizedImage(const Mat& input) {
+	::std::vector<double> h = getCumulativeDensityProbabilityDistribution(input);
+	Mat* retVal = new Mat{input.rows, input.cols, CV_8UC1};
+
+	for (int y=0; y<input.rows; y++) {
+		for (int x=0; x<input.cols; x++) {
+			retVal->at<uchar>(y,x) = 255. * h[input.at<uchar>(y, x)];
 		}
-		fclose(f);
 	}
+
+	return retVal;
 }
 
 
+/**
+ * It generate the histogram of the given image
+ *
+ * At the end of the program output, you will be prompted to open gnuplot.
+ * On a terminal, do:
+ *
+ * <code>
+ * 	$ gnuplot
+ * 	$ plot "histogram-before-equalization.dat" using 1:2 with lines
+ * </code>
+ *
+ * This will allow you to show the histogram of the image grayscale.
+ */
 int main(int argc, char** argv )
 {
 
@@ -105,15 +172,24 @@ int main(int argc, char** argv )
 		return -1;
 	}
 
-	createHistogramOf(image, "histogram.dat");
-	::std::cout << "DONE. Please open gnuplot (sudo apt-get install gnuplot) and inside its terminal perform the action" << ::std::endl;
-	::std::cout << "   plot \"histogram.dat\" using 1:2 with lines" << ::std::endl;
+	createHistogramOf(getCumulativeDensityProbabilityDistribution(image), "H.dat");
+	createHistogramOf(getDensityProbabilityDistribution(image), "h.dat");
 
-	namedWindow("Display Image", WINDOW_AUTOSIZE );
-	imshow("Display Image", image);
+	createHistogramOf(image, "histogram-before-equalization.dat");
+	Mat* equalizedImage = generateEqualizedImage(image);
+	createHistogramOf(*equalizedImage, "histogram-after-equalization.dat");
+
+	::std::cout << "DONE. Please open gnuplot (sudo apt-get install gnuplot) and inside its terminal perform the action" << ::std::endl;
+	::std::cout << "   plot \"histogram-before-equalization.dat\" using 1:2 with lines" << ::std::endl;
+	::std::cout << "   plot \"histogram-after-equalization.dat\" using 1:2 with lines" << ::std::endl;
+
+	namedWindow("input", WINDOW_AUTOSIZE );
+	namedWindow("equalized", WINDOW_AUTOSIZE );
+	imshow("input", image);
+	imshow("equalized", *equalizedImage);
 	waitKey(0);
 
-	destroyWindow("Display Image");
+	destroyAllWindows();
 
 	return 0;
 }
