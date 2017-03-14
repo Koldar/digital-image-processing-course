@@ -27,9 +27,12 @@ Mat* applyConvolution(const Mat& input, const Mat& kernel, BorderPolicy borderPo
  * \attention
  * The function wil create a new ::Mat in the heap. You need to manually remove it from the memory afterwards.
  *
+ * Function inspired by the work available <a ref="http://web.pdx.edu/~jduh/courses/Archive/geog481w07/Students/Ludwig_ImageConvolution.pdf">here</a>
+ *
  * @param[in] input1 the first image to convolve
  * @param[in] input2 the second image to convolve
  * @param[in] borderPolicy how you want to deal with the indexes out of the images
+ * @return the convolution between the 2 images
  */
 Mat* applyConvolution(const Mat& input, const Mat& kernel, BorderPolicy borderPolicy) {
 	int outputRows =  input.rows + kernel.rows - 1;
@@ -44,8 +47,8 @@ Mat* applyConvolution(const Mat& input, const Mat& kernel, BorderPolicy borderPo
 	Mat* retVal = new Mat{outputRows, outputCols, input.type()};
 	retVal->setTo(Vec3b{0, 0, 0});
 
-	for (int y=0; y<input.rows; y++) {
-		for (int x=0; x<input.cols; x++) {
+	for (int y=0; y<outputRows; y++) {
+		for (int x=0; x<outputCols; x++) {
 
 			for (int ky=0; ky<kernel.rows; ky++) {
 				for (int kx=0; kx<kernel.cols; kx++) {
@@ -60,12 +63,12 @@ Mat* applyConvolution(const Mat& input, const Mat& kernel, BorderPolicy borderPo
 						inputPixel = input.at<Vec3b>(outY, outX);
 					}
 
-					//::std::cout << "x,y: " << x << ", " << y <<" outXY: " << outY << ", " << outX << "inputPixel: " << inputPixel << " halves: " << halfKernelRows << ", " << halfKernelColumns << ::std::endl;
+					::std::cout << "x,y: " << x << ", " << y <<" outXY: " << outY << ", " << outX << "inputPixel: " << inputPixel << " halves: " << halfKernelRows << ", " << halfKernelColumns << ::std::endl;
 
 					for (int c=0; c<3; c++) {
 						retVal->at<Vec3b>(y, x)[c] += (uchar)
-																	kernel.at<float>(ky, kx) *
-																	inputPixel[c];
+																			kernel.at<float>(ky, kx) *
+																			inputPixel[c];
 					}
 				}
 			}
@@ -150,15 +153,24 @@ int main(int argc, char** argv )
 
 	namedWindow("input", WINDOW_AUTOSIZE );
 	namedWindow("filtered", WINDOW_AUTOSIZE );
+	namedWindow("cropped", WINDOW_AUTOSIZE );
 	imshow("input", image);
 	imshow("filtered", *filteredImage);
-	waitKey(0);
 
-	destroyAllWindows();
+	//now we crop the filtered image with the size fo the original ones (to preserve sizes)
+	//see http://stackoverflow.com/a/8268062/1887602
+	Rect roi = Rect{kernel.cols/2, kernel.rows/2, image.cols, image.rows};
+	cv::Mat croppedImage = (*filteredImage)(roi);
+
+	imshow("cropped", croppedImage);
 
 	::std::cout << "filtered images size: " << image.rows << ", " << image.cols << ::std::endl;
 	::std::cout << "kernel images size: " << kernel.rows << ", " << kernel.cols << ::std::endl;
 	::std::cout << "filtered images size: " << filteredImage->rows << ", " << filteredImage->cols << ::std::endl;
+	::std::cout << "cropped images size: " << croppedImage.rows << ", " << croppedImage.cols << ::std::endl;
+
+	waitKey(0);
+	destroyAllWindows();
 
 	delete filteredImage;
 
