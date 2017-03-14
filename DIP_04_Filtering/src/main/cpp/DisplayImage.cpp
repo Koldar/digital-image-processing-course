@@ -4,6 +4,18 @@
 
 using namespace cv;
 
+typedef enum {
+	///the pixel is always 0
+	BP_ZERO,
+	///the pixel is the same value of the nearest valid pixel
+	BP_PROPAGATION,
+	///the pixel is the same value as the image were to be repeated outside the border
+	BP_MIRRORING
+} BorderPolicy;
+
+Vec3b handleBorderPolicy(const Mat& image, int outY, int outX, BorderPolicy bp);
+Mat* applyConvolution(const Mat& input, const Mat& kernel, BorderPolicy borderPolicy);
+
 /**
  * Apply the convolution between 2 signals, aka:
  *
@@ -17,8 +29,9 @@ using namespace cv;
  *
  * @param[in] input1 the first image to convolve
  * @param[in] input2 the second image to convolve
+ * @param[in] borderPolicy how you want to deal with the indexes out of the images
  */
-Mat* applyConvolution(const Mat& input, const Mat& kernel) {
+Mat* applyConvolution(const Mat& input, const Mat& kernel, BorderPolicy borderPolicy) {
 	int outputRows =  input.rows + kernel.rows - 1;
 	int outputCols = input.cols + kernel.cols - 1;
 	int halfKernelRows = kernel.rows/2;
@@ -40,9 +53,9 @@ Mat* applyConvolution(const Mat& input, const Mat& kernel) {
 					outX = x + kx - halfKernelColumns;
 
 					if ((outY < 0) || (outY >= input.rows)) {
-						inputPixel = Vec3b{0, 0, 0};
+						inputPixel = handleBorderPolicy(input, outY, outX, borderPolicy);
 					} else if ((outX < 0) || (outX >= input.cols)) {
-						inputPixel = Vec3b{0, 0, 0};
+						inputPixel = handleBorderPolicy(input, outY, outX, borderPolicy);
 					} else {
 						inputPixel = input.at<Vec3b>(outY, outX);
 					}
@@ -51,8 +64,8 @@ Mat* applyConvolution(const Mat& input, const Mat& kernel) {
 
 					for (int c=0; c<3; c++) {
 						retVal->at<Vec3b>(y, x)[c] += (uchar)
-													kernel.at<float>(ky, kx) *
-													inputPixel[c];
+																	kernel.at<float>(ky, kx) *
+																	inputPixel[c];
 					}
 				}
 			}
@@ -62,6 +75,48 @@ Mat* applyConvolution(const Mat& input, const Mat& kernel) {
 	}
 
 	return retVal;
+}
+
+/**
+ * Fetch the pixel value we should get when the algorithm goes out of the input image
+ *
+ * @param[in] image the image where we went outside the border
+ * @param[in] outY the row pixel we want to fetch (out of border)
+ * @param[in] outX the column pixel we want to fetch (out of border)
+ * @param[in] bp the policy we want to exploit to fetch the value of the out-of-border pixel. See ::BorderPolicy
+ */
+Vec3b handleBorderPolicy(const Mat& image, int outY, int outX, BorderPolicy bp) {
+	switch (bp) {
+	case BP_ZERO: {
+		return Vec3b{0, 0, 0};
+	}
+	case BP_PROPAGATION: {
+		if (outY < 0) {
+			outY = 0;
+		}
+		if (outY >= image.rows) {
+			outY = image.rows - 1;
+		}
+
+		if (outX < 0) {
+			outX = 0;
+		}
+		if (outX >= image.cols) {
+			outX = image.cols - 1;
+		}
+
+		return image.at<Vec3b>(outY, outX);
+	}
+	case BP_MIRRORING: {
+		outY = (outY % image.rows);
+		outX = (outX % image.cols);
+		return image.at<Vec3b>(outY, outX);
+	}
+	default: {
+		::std::cout << "border policy used is " << bp << ::std::endl;
+		error(1, "Invalid Border policy!", __func__, __FILE__, __LINE__);
+	}
+	}
 }
 
 
@@ -91,7 +146,7 @@ int main(int argc, char** argv )
 
 	float kernelData[3][3] = {{0./9, 0./9, 0./9}, {0./9, 9./9, 0./9},{0./9, 0./9, 0./9}};
 	Mat kernel = Mat{3, 3, CV_32FC1, &kernelData};
-	Mat* filteredImage = applyConvolution(image, kernel);
+	Mat* filteredImage = applyConvolution(image, kernel, BP_ZERO);
 
 	namedWindow("input", WINDOW_AUTOSIZE );
 	namedWindow("filtered", WINDOW_AUTOSIZE );
