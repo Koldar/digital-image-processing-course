@@ -23,16 +23,37 @@ Mat* applyConvolution(const Mat& input, const Mat& kernel) {
 	int outputCols = input.cols + kernel.cols - 1;
 	int halfKernelRows = kernel.rows/2;
 	int halfKernelColumns = kernel.cols/2;
+	int outY;
+	int outX;
+	Vec3f inputPixel;
+
 
 	Mat* retVal = new Mat{outputRows, outputCols, input.type()};
-	retVal->setTo(0);
+	retVal->setTo(Vec3b{0, 0, 0});
 
 	for (int y=0; y<input.rows; y++) {
 		for (int x=0; x<input.cols; x++) {
 
 			for (int ky=0; ky<kernel.rows; ky++) {
 				for (int kx=0; kx<kernel.cols; kx++) {
-					retVal->at<uchar>(y+ky-halfKernelRows, x+kx-halfKernelColumns) += kernel.at<uchar>(ky, kx) * input.at<uchar>(y-halfKernelRows, x-halfKernelColumns);
+					outY = y + ky - halfKernelRows;
+					outX = x + kx - halfKernelColumns;
+
+					if ((outY < 0) || (outY >= input.rows)) {
+						inputPixel = Vec3b{0, 0, 0};
+					} else if ((outX < 0) || (outX >= input.cols)) {
+						inputPixel = Vec3b{0, 0, 0};
+					} else {
+						inputPixel = input.at<Vec3b>(outY, outX);
+					}
+
+					//::std::cout << "x,y: " << x << ", " << y <<" outXY: " << outY << ", " << outX << "inputPixel: " << inputPixel << " halves: " << halfKernelRows << ", " << halfKernelColumns << ::std::endl;
+
+					for (int c=0; c<3; c++) {
+						retVal->at<Vec3b>(y, x)[c] += (uchar)
+													kernel.at<float>(ky, kx) *
+													inputPixel[c];
+					}
 				}
 			}
 
@@ -59,8 +80,8 @@ int main(int argc, char** argv )
 	}
 
 	Mat image;
-	//image = imread( argv[1], IMREAD_GRAYSCALE);
-	image = imread( argv[1], IMREAD_GRAYSCALE);
+	image = imread( argv[1], IMREAD_COLOR);
+	//image.convertTo(image, CV_32FC3);
 
 	if (!image.data)
 	{
@@ -68,8 +89,8 @@ int main(int argc, char** argv )
 		return -1;
 	}
 
-	float kernelData[][] = {{1./9, 1./9, 1./9}, {1./9, 1./9, 1./9},{1./9, 1./9, 1./9}};
-	Mat kernel = Mat{2, 5, CV_32FC1, &kernelData};
+	float kernelData[3][3] = {{0./9, 0./9, 0./9}, {0./9, 9./9, 0./9},{0./9, 0./9, 0./9}};
+	Mat kernel = Mat{3, 3, CV_32FC1, &kernelData};
 	Mat* filteredImage = applyConvolution(image, kernel);
 
 	namedWindow("input", WINDOW_AUTOSIZE );
@@ -79,6 +100,12 @@ int main(int argc, char** argv )
 	waitKey(0);
 
 	destroyAllWindows();
+
+	::std::cout << "filtered images size: " << image.rows << ", " << image.cols << ::std::endl;
+	::std::cout << "kernel images size: " << kernel.rows << ", " << kernel.cols << ::std::endl;
+	::std::cout << "filtered images size: " << filteredImage->rows << ", " << filteredImage->cols << ::std::endl;
+
+	delete filteredImage;
 
 	return 0;
 }
