@@ -20,10 +20,11 @@
 <booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="false"/>
 <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL" value="main"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROGRAM_ARGUMENTS" value="lena30.jpg"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="${workspace_loc:DIP_04_Filtering}/build/Debug/DisplayImage"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="${workspace_loc:DIP_06_Segmentation}/build/Debug/DisplayImage"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="DIP_06_Segmentation"/>
 <booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="true"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.WORKING_DIRECTORY" value="${workspace_loc:DIP_06_Segmentation}/build/Debug/"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/DIP_06_Segmentation"/>
 </listAttribute>
