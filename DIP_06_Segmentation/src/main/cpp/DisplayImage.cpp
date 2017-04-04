@@ -139,36 +139,93 @@ int computeOtsuThreshold(Mat& image) {
 
 //REGION GROWING
 
+typedef enum PickPixelPolicy {
+	SEQUENTIAL,
+	RANDOM
+} PickPixelPolicy;
 
-class Region {
+float ENHANCECOEFFICIENT = 256/50;
+int MAX_REGION_NUMBER = 50;
+int REGION_THRESHOLD = 40;
+PickPixelPolicy PICK_PIXEL_POLICY = RANDOM;
+
+
+class MyRegion {
 public:
 	int id;
 	float mean;
 	int size;
 	static Mat* pixelMapping;
+
+	MyRegion();
+	MyRegion(int id);
+
+	void add(uchar pixel);
+
+	/**
+	 * Check of a point belongs to a region
+	 * @param[in] p the point to check
+	 */
+	static bool isPixelInsideARegion(Point2i& p);
 };
 
-static Point2i pickPixelWithoutRegion(vector<Region>& regions) {
-	for (int y=0; y<Region::pixelMapping->rows; y++) {
-		for (int x=0; x<Region::pixelMapping->cols; x++) {
-			//cout << "trying to pick up "<< x << ", " << y << " of region " << (int)(regions->at<uchar>(y, x)) << endl;
-			if (((int)Region::pixelMapping->at<uchar>(y, x)) == 0) {
-				return Point2i(x, y);
+Mat* MyRegion::pixelMapping = NULL;
+
+MyRegion::MyRegion(int id) : id(id), mean(0), size(0) {
+}
+
+MyRegion::MyRegion() : id(0), mean(0), size(0){
+}
+
+bool MyRegion::isPixelInsideARegion(Point2i& p) {
+	//cout << __func__ << " " << (int)MyRegion::pixelMapping->at<uchar>(p) << endl;
+	return MyRegion::pixelMapping->at<uchar>(p) > 0;
+}
+
+void MyRegion::add(uchar pixel) {
+	this->mean = this->mean + (pixel - this->mean)/(this->size + 1);
+	this->size += 1;
+}
+
+static Point2i pickPixelWithoutRegion(PickPixelPolicy ppp, vector<MyRegion>& regions) {
+
+	switch (ppp) {
+	case SEQUENTIAL:
+		for (int y=0; y<MyRegion::pixelMapping->rows; y++) {
+			for (int x=0; x<MyRegion::pixelMapping->cols; x++) {
+				//cout << "trying to pick up "<< x << ", " << y << " of region " << (int)(regions->at<uchar>(y, x)) << endl;
+				if (((int)MyRegion::pixelMapping->at<uchar>(y, x)) == 0) {
+					return Point2i{x, y};
+				}
 			}
 		}
+		throw logic_error("no pixel without region");
+	case RANDOM:
+		int limit = 0;
+		while(limit < 1e5) {
+			int y = rand() % MyRegion::pixelMapping->rows;
+			int x = rand() % MyRegion::pixelMapping->cols;
+			if (((int)MyRegion::pixelMapping->at<uchar>(y, x)) == 0) {
+				return Point2i{x, y};
+			}
+			limit++;
+		}
+		throw logic_error("can't find a random pixel bcause we have supassed limit!");
 	}
-	throw logic_error("no pixel without region");
+
+
+
 }
 
-bool shouldPointBeAddedInQueue(Point2i p, vector<Region>& regions) {
+bool shouldPointBeAddedInQueue(Point2i p) {
 	return (p.x >= 0) &&
 			(p.y >= 0) &&
-			(p.x < Region::pixelMapping->cols) &&
-			(p.y < Region::pixelMapping->rows) &&
-			(Region::pixelMapping->at<uchar>(p) == 0);
+			(p.x < MyRegion::pixelMapping->cols) &&
+			(p.y < MyRegion::pixelMapping->rows) &&
+			(MyRegion::isPixelInsideARegion(p) == false);
 }
 
-vector<Point2i> getNonVisitedNeighbours(vector<Region>& regions, Point2i p) {
+vector<Point2i> getNonVisitedNeighbours(Point2i p) {
 	vector<Point2i> retVal;
 
 	Point2i neighbour;
@@ -178,7 +235,8 @@ vector<Point2i> getNonVisitedNeighbours(vector<Region>& regions, Point2i p) {
 				continue;
 			}
 			neighbour = Point{p.x + x, p.y + y};
-			if (shouldPointBeAddedInQueue(neighbour, regions)) {
+			if (shouldPointBeAddedInQueue(neighbour)) {
+				//cout << " adding point "<< neighbour << " into the neighbouhood!" << endl;
 				retVal.push_back(neighbour);
 			}
 		}
@@ -186,36 +244,37 @@ vector<Point2i> getNonVisitedNeighbours(vector<Region>& regions, Point2i p) {
 	return retVal;
 }
 
-bool isPixelBelogingToRegion(Point2i p, uchar r, Mat& image, vector<Region>& regions) {
-	cout << image.at<uchar>(p) << " == " << (int)r << endl;
-	Region region;
-	for (vector<Region>::iterator it=regions.begin(); it!=regions.end(); ++it) {
-		if (it->id == (int)r) {
-			region = *it;
-		}
-	}
-	return abs(image.at<uchar>(p) - region.mean) < 50;
+bool shouldPixelBeInRegion(Point2i p, MyRegion region, Mat& image) {
+	//cout << __func__ << " " << (int)image.at<uchar>(p) << " VS " << region.mean << " = " << (abs(image.at<uchar>(p) - region.mean) < 50) << endl;
+	return abs(image.at<uchar>(p) - region.mean) < REGION_THRESHOLD;
 }
 
-void growRegion(deque<Point2i>* openPixels, uchar currentRegionValue, Mat& image, vector<Region>& regions) {
+void growRegion(deque<Point2i>* openPixels, MyRegion& currentRegion, Mat& image) {
 	Point2i p;
 	vector<Point2i> neighbourhood;
 
 	while (!openPixels->empty()) {
 		p = openPixels->front();
-		cout << "queue size " << openPixels->size() << " p: " << p << endl;
+		//cout << __func__ << " queue size " << openPixels->size() << " p: " << p << endl;
 		openPixels->pop_front();
 
-		if (isPixelBelogingToRegion(p, currentRegionValue, image, regions)) {
-			Region::pixelMapping->at<uchar>(p) = currentRegionValue;
+		if ((currentRegion.size > 1) && (MyRegion::isPixelInsideARegion(p) == true)) {
+			continue;
+		}
+
+		if (shouldPixelBeInRegion(p, currentRegion, image)) {
+			MyRegion::pixelMapping->at<uchar>(p) = currentRegion.id;
 
 			//update region data
+			//online alkgorithm to compute average has been inspired from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
+			currentRegion.add(image.at<uchar>(p));
 
-
-			neighbourhood = getNonVisitedNeighbours(regions, p);
-			cout << "neighbourhood "<< neighbourhood << endl;
+			neighbourhood = getNonVisitedNeighbours(p);
+			//cout << __func__ << " neighbourhood "<< neighbourhood << endl;
 			for (std::vector<Point2i>::iterator it=neighbourhood.begin(); it!=neighbourhood.end(); ++it) {
+				//cout << "before adding neighourhood " << openPixels->size() << endl;
 				openPixels->push_back(*it);
+				//cout << "after adding neighourhood " << openPixels->size() << endl;
 			}
 		}
 	}
@@ -226,19 +285,21 @@ Mat* computeSegmentationViaRegionGrowing(Mat& image) {
 	Point2i p;
 	uchar currentRegionValue = 0;
 	vector<Point2i> neighbourhood;
-	vector<Region> regions;
-	Region::pixelMapping = new Mat{image.rows, image.cols, CV_8UC1};
+	vector<MyRegion> regions;
+	//the new regione created (and we need to build it)
+	MyRegion rgn;
+	MyRegion::pixelMapping = new Mat{image.rows, image.cols, CV_8UC1};
 
-	Region::pixelMapping->setTo(0);
+	MyRegion::pixelMapping->setTo(0);
 
 	while (true) {
 		//pick a new pixel
 		try {
-			if (currentRegionValue == 255) {
+			if (currentRegionValue == MAX_REGION_NUMBER) {
 				throw logic_error("we used all the available regions!");
 			}
-			p = pickPixelWithoutRegion(regions);
-			cout << "picking up "<< p << " of region " << (int)(Region::pixelMapping->at<uchar>(p)) << endl;
+			p = pickPixelWithoutRegion(PICK_PIXEL_POLICY, regions);
+			//cout << __func__ << " picking up "<< p << " of region " << (int)(MyRegion::pixelMapping->at<uchar>(p)) << endl;
 		} catch (logic_error e) {
 			cout << "out!" << endl;
 			//no pixel can be fetched
@@ -246,16 +307,34 @@ Mat* computeSegmentationViaRegionGrowing(Mat& image) {
 		}
 		//the new pixel is a new region
 		currentRegionValue += 1;
-		Region::pixelMapping->at<uchar>(p) = currentRegionValue;
-		cout << "point "<< p << " is now of region " << (int)(Region::pixelMapping->at<uchar>(p)) << endl;
+		rgn = MyRegion{currentRegionValue};
+
+		rgn.add(image.at<uchar>(p));
+		MyRegion::pixelMapping->at<uchar>(p) = currentRegionValue;
+
+
+		//cout << __func__ << "point "<< p << " is now of region " << (int)(MyRegion::pixelMapping->at<uchar>(p)) << endl;
 		openPixels->push_back(p);
-		growRegion(openPixels, currentRegionValue, image, regions);
+		growRegion(openPixels, rgn, image);
+		regions.push_back(rgn);
 	}
 
 	exit:
 	cout << "regions are " << (int)(currentRegionValue) << endl;
+	for (vector<MyRegion>::iterator it=regions.begin(); it!=regions.end(); ++it) {
+		cout << "region #" << it->id << " has " << it->size << " elements with an average of " << it->mean << endl;
+	}
+
 	delete openPixels;
-	return regions;
+	return MyRegion::pixelMapping;
+}
+
+void enhanceColors(Mat& image, float enhanceCoefficient) {
+	for (int y=0; y<image.rows; y++) {
+		for (int x=0; x<image.cols; x++) {
+			image.at<uchar>(y,x) = (uchar)(image.at<uchar>(y,x) * enhanceCoefficient);
+		}
+	}
 }
 
 
@@ -273,6 +352,7 @@ Mat* computeSegmentationViaRegionGrowing(Mat& image) {
 int main(int argc, char** argv )
 {
 
+	srand(time(NULL));
 	if ( argc != 2 )
 	{
 		printf("usage: DisplayImage.out <Image_Path>\n");
@@ -299,6 +379,8 @@ int main(int argc, char** argv )
 
 	//REGION GROWING
 	Mat* regions = computeSegmentationViaRegionGrowing(image);
+	enhanceColors(*regions, ENHANCECOEFFICIENT);
+
 	namedWindow("Regions", CV_WINDOW_AUTOSIZE );
 	imshow("Regions", *regions);
 	waitKey(0);
