@@ -145,8 +145,8 @@ typedef enum PickPixelPolicy {
 } PickPixelPolicy;
 
 float ENHANCECOEFFICIENT = 256/50;
-int MAX_REGION_NUMBER = 50;
-int REGION_THRESHOLD = 40;
+int MAX_REGION_NUMBER = 70;
+int REGION_THRESHOLD = 50;
 PickPixelPolicy PICK_PIXEL_POLICY = RANDOM;
 
 
@@ -186,6 +186,8 @@ void MyRegion::add(uchar pixel) {
 	this->mean = this->mean + (pixel - this->mean)/(this->size + 1);
 	this->size += 1;
 }
+
+void computeColorsFromRegions(Mat& image, vector<MyRegion>& regions);
 
 static Point2i pickPixelWithoutRegion(PickPixelPolicy ppp, vector<MyRegion>& regions) {
 
@@ -320,13 +322,40 @@ Mat* computeSegmentationViaRegionGrowing(Mat& image) {
 	}
 
 	exit:
-	cout << "regions are " << (int)(currentRegionValue) << endl;
 	for (vector<MyRegion>::iterator it=regions.begin(); it!=regions.end(); ++it) {
 		cout << "region #" << it->id << " has " << it->size << " elements with an average of " << it->mean << endl;
 	}
+	cout << "regions are " << (int)(currentRegionValue) << endl;
+	int unRegionedPixel = 0;
+	for (int y=0; y<MyRegion::pixelMapping->rows; y++) {
+		for (int x=0; x<MyRegion::pixelMapping->rows; x++) {
+			p = Point2i{x,y};
+			if (MyRegion::isPixelInsideARegion(p) == false) {
+				unRegionedPixel++;
+			}
+		}
+	}
+	cout << "unregioned pixels are " << unRegionedPixel << "(percentage = " << (100*unRegionedPixel)/(1.0 * image.rows * image.cols) <<endl;
+
 
 	delete openPixels;
+	computeColorsFromRegions(*MyRegion::pixelMapping, regions);
 	return MyRegion::pixelMapping;
+}
+
+void computeColorsFromRegions(Mat& image, vector<MyRegion>& regions) {
+	for (int y=0; y<image.rows; y++) {
+			for (int x=0; x<image.cols; x++) {
+				for (vector<MyRegion>::iterator it=regions.begin(); it!=regions.end(); ++it) {
+					if (it->id == image.at<uchar>(y,x)) {
+						//region we were looking for
+						image.at<uchar>(y,x) = (uchar)it->mean;
+					}
+
+				}
+
+			}
+		}
 }
 
 void enhanceColors(Mat& image, float enhanceCoefficient) {
